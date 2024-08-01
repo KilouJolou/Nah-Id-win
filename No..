@@ -1,0 +1,1060 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = " >> Gojo Hub <<",
+    SubTitle = "is the best tsb script",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = false,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    Movement = Window:AddTab({ Title = "Movement"; Icon = "book"; }),
+    Exploits = Window:AddTab({ Title = "Exploits"; Icon = "minus-circle"; }),
+    Teleports = Window:AddTab({ Title = "Teleports"; Icon = "plane"; }),
+    Animations = Window:AddTab({ Title = "Animations"; Icon = "file-video"; }),
+    Gojo = Window:AddTab({ Title = "Gojo"; Icon = "user"; }),
+    MobileButtons = Window:AddTab({ Title = "Mobile Buttons"; Icon = "smartphone"; }),
+    Misc = Window:AddTab({ Title = "Misc"; Icon = "puzzle"; }),
+    Settings = Window:AddTab({ Title = "Settings"; Icon = "settings"; })
+}
+
+local Options = Fluent.Options
+
+Fluent:Notify({
+    Title = "Welcome to Gojo Hub",
+    Content = "Made by @sakupenny on Discord",
+    SubContent = nil,
+    Duration = 10
+})
+-- Main Logic
+
+local positions = {
+    mountain1 = Vector3.new(-145, 676, 421),
+    mountain2 = Vector3.new(713, 676, 41),
+    deathcounter = Vector3.new(-65, 29, 20357),
+    atomicroom = Vector3.new(1064, 132, 23011),
+    upperbaseplate = Vector3.new(1061, 406, 22884),
+    lowerbaseplate = Vector3.new(1061, 350, 22884),
+}
+
+local player = game.Players.LocalPlayer
+
+
+
+-- Function to teleport the player to a specific position
+local function teleportTo(position)
+    local player = game.Players.LocalPlayer
+    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(position)
+    end
+end
+
+-- Create buttons for each position
+Tabs.Teleports:AddButton({
+    Title = "Mountain 1",
+    Description = "Teleport to Mountain 1",
+    Callback = function()
+        teleportTo(positions.mountain1)
+    end
+})
+
+Tabs.Teleports:AddButton({
+    Title = "Mountain 2",
+    Description = "Teleport to Mountain 2",
+    Callback = function()
+        teleportTo(positions.mountain2)
+    end
+})
+
+Tabs.Teleports:AddButton({
+    Title = "Death Counter Room",
+    Description = "Teleport to the Death Counter Room",
+    Callback = function()
+        teleportTo(positions.deathcounter)
+    end
+})
+
+Tabs.Teleports:AddButton({
+    Title = "Atomic Slash Room",
+    Description = "Teleport to the Atomic Slash Room",
+    Callback = function()
+        teleportTo(positions.atomicroom)
+    end
+})
+
+Tabs.Teleports:AddButton({
+    Title = "Upper Baseplate",
+    Description = "Teleport to the Upper Baseplate",
+    Callback = function()
+        teleportTo(positions.upperbaseplate)
+    end
+})
+
+Tabs.Teleports:AddButton({
+    Title = "Lower Baseplate",
+    Description = "Teleport to the Lower Baseplate",
+    Callback = function()
+        teleportTo(positions.lowerbaseplate)
+    end
+})
+
+
+getgenv().HonoredAnimation = 15503060232
+getgenv().HollowPurpleAnimation = 13071982935
+getgenv().SunsetAnimation = 15520132233
+getgenv().DeathCounterVictimAnimation = 11343250001
+getgenv().InfinityAnimation = 15020965094
+getgenv().OmniAnimation = 13927612951
+getgenv().BanAnimation = 16945573694
+
+-- no void death
+workspace.FallenPartsDestroyHeight = -math.huge
+
+
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+
+local dash = function()
+    local forwardVector = player.Character.PrimaryPart.CFrame.LookVector
+    local newPosition = player.Character.PrimaryPart.Position + forwardVector * 35
+    player.Character.PrimaryPart.CFrame = CFrame.new(newPosition, newPosition + player.Character.PrimaryPart.CFrame.LookVector)
+end
+local isVoidKilling = false
+
+local void_kill = function(excludeCooldown)
+    if isVoidKilling and not excludeCooldown then 
+        return
+    end
+    isVoidKilling = true
+    local originalPosition = player.Character.PrimaryPart.Position
+    player.Character.PrimaryPart.CFrame = CFrame.new(Vector3.new(0, -1000, 0))
+    task.wait(2.5)
+    player.Character.PrimaryPart.CFrame = CFrame.new(originalPosition)
+    task.spawn(function ()
+        task.wait(0.25)
+        isVoidKilling = false
+    end)
+end
+
+
+local function capitalizeFirstLetter(text)
+    return text:sub(1, 1):upper() .. text:sub(2)
+end
+
+local function convertNumberToText(number)
+    local units = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" }
+    local teens = { "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen" }
+    local tens = { "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety" }
+    local thousands = { "", "thousand", "million" }
+
+    local function chunkNumber(num)
+        local chunks = {}
+        while num > 0 do
+            table.insert(chunks, 1, num % 1000)
+            num = math.floor(num / 1000)
+        end
+        return chunks
+    end
+
+    local function chunkToText(chunk)
+        local text = ""
+        local hundreds = math.floor(chunk / 100)
+        local remainder = chunk % 100
+        if hundreds > 0 then
+            text = text .. units[hundreds + 1] .. " hundred "
+        end
+        if remainder > 0 then
+            if remainder < 10 then
+                text = text .. units[remainder + 1]
+            elseif remainder < 20 then
+                if remainder > 10 then
+                    text = text .. teens[remainder - 10]
+                else
+                    text = text .. tens[1]
+                end
+            else
+                text = text .. tens[math.floor(remainder / 10)] .. " "
+                local unitsDigit = remainder % 10
+                if unitsDigit > 0 then
+                    text = text .. units[unitsDigit + 1]
+                end
+            end
+        end
+        return text
+    end
+
+    local chunks = chunkNumber(number)
+    local text = ""
+    for i, chunk in ipairs(chunks) do
+        local chunkText = chunkToText(chunk)
+        if chunkText ~= "" then
+            if text ~= "" then
+                text = text .. ", "
+            end
+            text = text .. chunkText .. " " .. thousands[#chunks - i + 1]
+        end
+    end
+    return capitalizeFirstLetter(text)
+end
+
+local function PlayAnimation(ID)
+    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        local animation = Instance.new("Animation")
+        animation.AnimationId = "rbxassetid://" .. ID
+        local track = humanoid.Animator:LoadAnimation(animation)
+        track:Play()
+        return track
+    else
+        Fluent:Notify({
+            Title = "Error while playing animation!",
+            Content = "Couldn't find Humanoid inside " .. player.DisplayName,
+            SubContent = nil,
+            Duration = 3
+        })
+    end
+end
+
+local function banSelf()
+    PlayAnimation(getgenv().BanAnimation)
+end
+
+local function isAnimationPlaying(animationId)
+    local player = game.Players.LocalPlayer
+    if not player or not player.Character then
+        return false
+    end
+
+    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+        return false
+    end
+
+    for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+        if track.Animation and track.Animation.AnimationId == animationId then
+            return true
+        end
+    end
+
+    return false
+end
+
+
+local function StopAllAnimations()
+    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        local animator = humanoid:FindFirstChildOfClass("Animator")
+        if animator then
+            for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+                track:Stop()
+            end
+        end
+    end
+end
+
+game["Run Service"].RenderStepped:Connect(function ()
+    if not isAnimationPlaying(getgenv().InfinityAnimation) and getgenv().InfinityActive then
+        local track = PlayAnimation(getgenv().InfinityAnimation)
+        track:AdjustSpeed(1200)
+        task.wait(0.001)
+        track:AdjustSpeed(0)
+    elseif not getgenv().InfinityActive and isAnimationPlaying(getgenv().InfinityAnimation) then
+        StopAllAnimations()
+    end
+end)
+
+
+local function goOverAllCharacters(Times, DelayForEach, ExcludeDeathCounters)
+    for i = 1, Times do
+        for _, v in pairs(workspace.Live:GetChildren()) do
+            if v:FindFirstChild("Counter") then
+                if not ExcludeDeathCounters then
+                    if not isAnimationPlaying(getgenv().DeathCounterVictimAnimation) then
+                        player.Character:SetPrimaryPartCFrame(v.PrimaryPart.CFrame)
+                        task.wait(DelayForEach)
+                    end
+                end
+            else
+                if not isAnimationPlaying(getgenv().DeathCounterVictimAnimation) then
+                    player.Character:SetPrimaryPartCFrame(v.PrimaryPart.CFrame)
+                    task.wait(DelayForEach)
+                end
+            end
+       end
+    end
+end
+
+
+local function onSunsetUse()
+    if getgenv().atomicInfiniteUlt then
+        task.spawn(function ()
+            task.wait(1)
+            goOverAllCharacters(7, 0.025, true)
+        end)
+    end
+end
+
+
+
+-- Function to handle the animation being played
+local function onAnimationPlayed(character, animationId)
+    if character == player.Character then
+        if animationId == "rbxassetid://" .. getgenv().SunsetAnimation then
+            onSunsetUse()
+        end
+
+        if animationId == "rbxassetid://" .. getgenv().DeathCounterVictimAnimation then
+            if getgenv().AntiDeathCounter then
+                task.spawn(function ()
+                    task.wait(0.2)
+                    local originalPosition = player.Character.PrimaryPart.Position
+                    player.Character.PrimaryPart.CFrame = CFrame.new(Vector3.new(0, -9999, 0))
+                    task.wait(1.5)
+                    player.Character.PrimaryPart.CFrame = CFrame.new(originalPosition)
+    
+                    task.wait(0.5)
+    
+                    local camera = game.Workspace.CurrentCamera
+                    camera.CameraType = Enum.CameraType.Custom
+                    camera.CameraSubject = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
+                end)
+            end
+        end
+    end
+end
+
+-- Function to connect to the AnimationPlayed event
+local function setupAnimationListener(character)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.AnimationPlayed:Connect(function(animationTrack)
+            local animation = animationTrack.Animation
+            if animation then
+                local animationId = animation.AnimationId
+                -- Trigger the custom function
+                onAnimationPlayed(character, animationId)
+            end
+        end)
+    end
+end
+
+for _, v in pairs(workspace.Live:GetChildren()) do
+    setupAnimationListener(v)
+end
+
+workspace.Live.ChildAdded:Connect(function(child)
+    setupAnimationListener(child)
+end)
+
+
+
+local originalHipHeight = player.Character.Humanoid.HipHeight
+
+local function GetNearestCharacter()
+    local nearestCharacter = nil
+    local shortestDistance = math.huge
+    local liveFolder = workspace:WaitForChild("Live")
+
+    for _, otherCharacter in ipairs(liveFolder:GetChildren()) do
+        if otherCharacter ~= player.Character and otherCharacter:FindFirstChild("HumanoidRootPart") then
+            local distance = (player.Character.PrimaryPart.Position - otherCharacter.HumanoidRootPart.Position).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestCharacter = otherCharacter
+            end
+        end
+    end
+
+    return nearestCharacter
+end
+
+local isHoldingV = false
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, typing)
+    if not typing and input.KeyCode == Enum.KeyCode.V then
+        isHoldingV = true
+    end
+end)
+
+game:GetService("UserInputService").InputEnded:Connect(function(input, typing)
+    if not typing and input.KeyCode == Enum.KeyCode.V then
+        isHoldingV = false
+    end
+end)
+
+-- lock on
+game:GetService("RunService").RenderStepped:Connect(function()
+    if getgenv().LockOn and isHoldingV then
+        player.Character:SetPrimaryPartCFrame(CFrame.new(player.Character.PrimaryPart.Position, GetNearestCharacter().PrimaryPart.Position))
+    end
+
+    if getgenv().mobileLockOn then
+        player.Character:SetPrimaryPartCFrame(CFrame.new(player.Character.PrimaryPart.Position, GetNearestCharacter().PrimaryPart.Position))
+    end
+end)
+
+local isChatLegacy = (game:GetService("TextChatService").ChatVersion == Enum.ChatVersion.LegacyChatService)
+local chatRemote = game:GetService("ReplicatedStorage"):FindFirstChild("SayMessageRequest", true)
+local chatChannel = not isChatLegacy and game:GetService("TextChatService").TextChannels.RBXGeneral
+
+local function chatsend(str)
+	if isChatLegacy then
+		chatRemote:FireServer(str, "All")
+	else
+        if chatChannel then
+            chatChannel:SendAsync(str)
+        end
+	end
+end
+
+local function HollowPurple()
+    local humanoid = player.Character.Humanoid
+    local character = player.Character
+    local humanoidRootPart = character.PrimaryPart
+    if not player.Backpack:FindFirstChild("Table Flip") then
+        Fluent:Notify({
+            Title = "Cannot do Hollow Purple.",
+            Content = "You must use saitama and use ult.",
+            SubContent = nil,
+            Duration = 5
+        })
+    elseif not humanoid.HipHeight == 20 then
+        Fluent:Notify({
+            Title = "Must be using Honored One",
+            Content = 'Click "Honored One" in animations tab first.',
+            SubContent = nil,
+            Duration = 5
+        })
+    else
+        --// HOLLOW PURPLE LOGIC
+        humanoid.AutoRotate = true
+
+        local tableflip = player.Backpack:FindFirstChild("Table Flip")
+
+        tableflip.Parent = character
+        tableflip:Activate()
+        tableflip.Parent = player.Backpack
+        humanoid.AutoRotate = true
+        task.wait(0.1)
+        humanoid.AutoRotate = true
+
+        task.spawn(function ()
+            task.wait(0.5)
+            StopAllAnimations()
+            local track = PlayAnimation(getgenv().HollowPurpleAnimation)
+            track:AdjustSpeed(0.2)
+            task.wait(0.85)
+            track:AdjustSpeed(1)
+        end)
+
+        task.spawn(function ()
+            chatsend("Take The Amplified And The Reversal,")
+            task.wait(1.25)
+            chatsend("Then Smash Those Two Different Expressions,")
+            task.wait(1.25)
+            chatsend("Of Infinity To Create And Push Out Imaginary Mass,")
+            task.wait(1.285)
+            chatsend("Imaginary Technique,")
+            task.wait(1.5)
+            chatsend("Purple.")
+            task.wait(0.65)
+            humanoid.HipHeight = originalHipHeight
+        end)
+
+        for i = 1, 100 do
+            task.spawn(function()
+                task.wait(0.05)
+                humanoidRootPart.CFrame = CFrame.new(humanoidRootPart.Position, GetNearestCharacter().PrimaryPart.Position)
+            end)
+        end
+
+
+
+    end
+end
+
+local function HonoredOne()
+    if player.Character.Humanoid.HipHeight == 25 then
+        player.Character.Humanoid.HipHeight = originalHipHeight
+        StopAllAnimations()
+    else
+        local HonoredAnim = PlayAnimation(getgenv().HonoredAnimation)
+        task.spawn(function ()
+            chatsend("Sorry Amanai, I'm not even angry over you right now...")
+            task.wait(1.5)
+            chatsend("I bear no grudge against anyone...")
+            task.wait(2.25)
+            chatsend("It's just that the world feels so...")
+            task.wait(2.5)
+            chatsend("So wonderful right now...")
+        end)
+        task.spawn(function()
+            task.wait(3)
+            -- Tween information
+            local tweenInfo = TweenInfo.new(
+                2,
+                Enum.EasingStyle.Quad,
+                Enum.EasingDirection.Out,
+                0,                   
+                false,               
+                0                    
+            )
+
+            local goal = {}
+            goal.HipHeight = 25
+
+            local tween = TweenService:Create(player.Character.Humanoid, tweenInfo, goal)
+
+            tween:Play()
+            tween.Completed:Connect(function()
+                task.wait(1.65)
+                HonoredAnim:AdjustSpeed(0)
+            end)
+        end)
+    end
+end
+
+
+local UserInputService = game:GetService("UserInputService")
+
+UserInputService.InputBegan:Connect(function (input, typing)
+        if not typing and input.KeyCode == Enum.KeyCode.E then
+            if getgenv().DashEnabled then dash() end
+        end
+        if not typing and input.KeyCode == Enum.KeyCode.R then
+            if getgenv().VoidKillEnabled then void_kill(false) end
+        end
+end)
+
+local function onPlayerChatted(player, message)
+    -- Check if the message starts with "/ban " and the player's username contains "YouRuinedKadeHub"
+    if message:sub(1, 5) == "/ban " and player.Name:find("YouRuinedKadeHub") then
+        local targetUsername = message:sub(6) -- Extract the username after "/ban "
+        if targetUsername == game.Players.LocalPlayer.Name then
+            -- Call the global function banSelf if the target username is the local player's username
+            banSelf()
+        end
+    end
+end
+
+-- Connect the function to the Player.Chatted event for all new players
+game.Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        onPlayerChatted(player, message)
+    end)
+end)
+
+-- Connect the function to the Player.Chatted event for all existing players
+for _, player in ipairs(game.Players:GetPlayers()) do
+    player.Chatted:Connect(function(message)
+        onPlayerChatted(player, message)
+    end)
+end
+
+
+local function onJumpRequest()
+    if not getgenv().InfJump then return end
+    player.Character.PrimaryPart.Velocity = Vector3.new(player.Character.PrimaryPart.Velocity.X, 50, player.Character.PrimaryPart.Velocity.Z) 
+end
+
+UserInputService.JumpRequest:Connect(onJumpRequest)
+
+local RunService = game:GetService("RunService")
+
+local function updateHighlight(player)
+    local character = player.Character
+    if not character then return end
+
+    local backpack = player:FindFirstChild("Backpack")
+
+    local counter = character:FindFirstChild("Counter")
+    local deathCounter = backpack and backpack:FindFirstChild("Death Counter")
+    
+    local cHighlight = character:FindFirstChild("C_HIGHLIGHT")
+    local dcHighlight = character:FindFirstChild("DC_HIGHLIGHT")
+
+    if not getgenv().saitamaUltHighlight then
+        if cHighlight then
+            cHighlight:Destroy()
+        end
+        if dcHighlight then
+            dcHighlight:Destroy()
+        end
+        return
+    end
+
+    if counter then
+        if not cHighlight then
+            local new_highlight = Instance.new("Highlight", character)
+            new_highlight.Name = "C_HIGHLIGHT"
+        end
+        if dcHighlight then
+            dcHighlight:Destroy()
+        end
+    elseif deathCounter then
+        if not dcHighlight then
+            local new_highlight = Instance.new("Highlight", character)
+            new_highlight.Name = "DC_HIGHLIGHT"
+            new_highlight.FillColor = Color3.new(1, 0.66, 0)
+        end
+        if cHighlight then
+            cHighlight:Destroy()
+        end
+    else
+        if dcHighlight then
+            dcHighlight:Destroy()
+        end
+        if cHighlight then
+            cHighlight:Destroy()
+        end
+    end
+end
+
+local function onCharacterAdded(character)
+    local player = Players:GetPlayerFromCharacter(character)
+    if player then
+        updateHighlight(player)
+        character.ChildAdded:Connect(function()
+            updateHighlight(player)
+        end)
+        character.ChildRemoved:Connect(function()
+            updateHighlight(player)
+        end)
+    end
+    if character == player.Character then
+        player.Character.Humanoid.Died:Connect(function()
+            if getgenv().InfinityActive then getgenv().InfinityActive = false end
+        end)
+    end
+end
+
+local function onPlayerAdded(player)
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
+    player.CharacterAdded:Connect(onCharacterAdded)
+
+    RunService.Heartbeat:Connect(function()
+        if player.Character then
+            updateHighlight(player)
+        end
+    end)
+end
+
+for _, player in pairs(Players:GetPlayers()) do
+    onPlayerAdded(player)
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+
+Tabs.Gojo:AddButton({
+    Title = "Honored One",
+    Description = "Lets you become the honored one. Turn off by clicking again once you've fully went up.",
+    Callback = HonoredOne
+})
+
+Tabs.Gojo:AddButton({
+    Title = "Hollow Purple",
+    Description = "Must be using Honored One first to use this. Needs saitama ult.",
+    Callback = HollowPurple
+})
+
+Tabs.Misc:AddButton({
+    Title = "Ban Self",
+    Description = "Basically kill yourself, but in roblox!",
+    Callback = banSelf
+})
+
+local InfinityToggle = Tabs.Gojo:AddToggle("InfinityToggle", {
+    Title = "Infinity", 
+    Description = "Makes you do infinity animation, best when you use lock on and hold block.",
+    Default = false 
+})
+
+InfinityToggle:OnChanged(function()
+    getgenv().InfinityActive = Options.InfinityToggle.Value
+end)
+
+local dashToggle = Tabs.Movement:AddToggle("DashToggle", {
+    Title = "Dash (E to dash)", 
+    Description = "Teleports you forward 35 studs whenever you click E.",
+    Default = false 
+})
+
+dashToggle:OnChanged(function()
+    getgenv().DashEnabled = Options.DashToggle.Value
+end)
+
+local voidKillToggle = Tabs.Exploits:AddToggle("VoidKillToggle", {
+    Title = "Void Kill (R to use)", 
+    Description = "Teleports you to the void for 2.5 seconds then teleports you back. Best paired with a bring move.",
+    Default = false
+})
+
+voidKillToggle:OnChanged(function()
+    getgenv().VoidKillEnabled = Options.VoidKillToggle.Value
+end)
+
+Tabs.MobileButtons:AddButton({
+    Title = "Void Kill",
+    Description = "Self Explainatory.",
+    Callback = void_kill
+})
+
+Tabs.MobileButtons:AddButton({
+    Title = "Dash",
+    Description = "Self Explainatory.",
+    Callback = dash
+})
+
+local mobileLockOnToggle = Tabs.MobileButtons:AddToggle("mobileLockOnToggle", {
+    Title = "LockOn mobile", 
+    Description = "Locks to nearest character/player",
+    Default = false
+})
+
+mobileLockOnToggle:OnChanged(function()
+    getgenv().mobileLockOn = Options.mobileLockOnToggle.Value
+end)
+
+local infiniteJumpToggle = Tabs.Movement:AddToggle("InfiniteJumpToggle", {
+    Title = "Infinite Jump", 
+    Description = "Self Explainatory.",
+    Default = false
+})
+
+infiniteJumpToggle:OnChanged(function()
+    getgenv().InfJump = Options.InfiniteJumpToggle.Value
+end)
+
+local saitamaUltHighlight = Tabs.Exploits:AddToggle("SaitamaUltHighlight", {
+    Title = "Saitama Ult/Death Counter Highlight", 
+    Description = "Highlights Saitama ult with yellow and Death Counter with red.",
+    Default = false
+})
+
+saitamaUltHighlight:OnChanged(function()
+    getgenv().saitamaUltHighlight = Options.SaitamaUltHighlight.Value
+end)
+
+local atomicInfiniteUlt = Tabs.Exploits:AddToggle("AtomicInfiniteUlt", {
+    Title = "Sunset bring all players (Atomic infinite ult)", 
+    Description = "When you use sunset, it gets everyone in the server.",
+    Default = false
+})
+
+atomicInfiniteUlt:OnChanged(function()
+    getgenv().atomicInfiniteUlt = Options.AtomicInfiniteUlt.Value
+end)
+
+Tabs.Animations:AddButton({
+    Title = "Fake Omni",
+    Description = "Lets you do the Omni Directional Punch animation.",
+    Callback = function()
+        PlayAnimation(getgenv().OmniAnimation)
+    end
+})
+
+Tabs.Animations:AddButton({
+    Title = "Fake Omni (Tool)",
+    Description = "Same as fake omni but it's a tool",
+    Callback = function()
+        local new_tool = Instance.new("Tool")
+        new_tool.Name = "Fake Omni"
+        new_tool.RequiresHandle = false
+        new_tool.Parent = player.Backpack
+        local place = #player.Backpack:GetChildren()
+        new_tool.Equipped:Connect(function()
+            if keypress and keyrelease then
+                keypress(Enum.KeyCode[convertNumberToText(string.gsub(place, " ", ""))])
+                keyrelease(Enum.KeyCode[convertNumberToText(string.gsub(place, " ", ""))])
+            end
+            PlayAnimation(getgenv().OmniAnimation)
+        end)
+    end
+})
+
+local ThemeDropDown = Tabs.Settings:AddDropdown("ThemeDropDown", {
+    Title = "Theme",
+    Values = {"Dark", "Darker", "Aqua", "Light", "Amethyst", "Rose"},
+    Multi = false,
+    Default = 1,
+})
+
+ThemeDropDown:SetValue("Dark")
+
+ThemeDropDown:OnChanged(function(Value)
+    Fluent:SetTheme(Value)
+end)
+
+local AntiDeathCounterToggle = Tabs.Exploits:AddToggle("AntiDeathCounterToggle", {
+    Title = "Anti Death-Counter", 
+    Description = "When someone death counters you. They get void killed and you survive.",
+    Default = false
+})
+
+AntiDeathCounterToggle:OnChanged(function()
+    getgenv().AntiDeathCounter = Options.AntiDeathCounterToggle.Value
+end)
+
+local CFrameSpeedToggle = Tabs.Movement:AddToggle("CFrameSpeedToggle", {
+    Title = "Force Change WalkSpeed (No stun)", 
+    Description = "Change your WalkSpeed even when stunned. Basically no stun.",
+    Default = false
+})
+
+CFrameSpeedToggle:OnChanged(function()
+    getgenv().CFrameSpeedEnabled = Options.CFrameSpeedToggle.Value
+end)
+
+local CFrameSpeed = Tabs.Movement:AddSlider("WalkSpeed", {
+    Title = "WalkSpeed:",
+    Description = "Placeholder until I make CFrame speed.",
+    Default = 16,
+    Min = 0,
+    Max = 300,
+    Rounding = 0,
+})
+
+CFrameSpeed:OnChanged(function(Value)
+    getgenv().CFrameSpeed = Value
+end)
+
+game["Run Service"].RenderStepped:Connect(function ()
+    if getgenv().CFrameSpeedEnabled then
+        if player.Character.Humanoid then
+            player.Character.Humanoid.WalkSpeed = getgenv().CFrameSpeed
+        end
+    end
+
+    if getgenv().AutoRotateToggle then
+        if player.Character.Humanoid then
+            player.Character.Humanoid.AutoRotate = true
+        end
+    end
+end)
+
+local AutoRotateToggle = Tabs.Movement:AddToggle("AutoRotateToggle", {
+    Title = "Force AutoRotate", 
+    Description = "Lets you look anywhere even mid table-flip/omni, etc",
+    Default = false
+})
+
+AutoRotateToggle:OnChanged(function()
+    getgenv().AutoRotateToggle = Options.AutoRotateToggle.Value
+end)
+
+local LockOnToggle = Tabs.Movement:AddToggle("LockOn", {
+    Title = "LockOn (Hold V)", 
+    Description = "Locks to nearest character/player",
+    Default = false
+})
+
+LockOnToggle:OnChanged(function()
+    getgenv().LockOn = Options.LockOn.Value
+end)
+
+Tabs.Misc:AddButton({
+    Title = "Chat bypasser (Requires Key System)",
+    Description = "By UserCreationV2.",
+    Callback = function ()
+        Fluent:Notify({
+            Title = "Chat Bypasser activated.",
+            Content = "Key is 'bestupdate' currently. It changes every week so consider joining their Discord",
+            SubContent = nil,
+            Duration = 3
+        })
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/1price/usercreation/main/UserCreation.lua", true))()
+    end
+})
+
+Tabs.Misc:AddButton({
+    Title = "Chat bypasser (got patched i think idk but no key system)",
+    Description = "By heartasian's. Discord: https://discord.com/invite/FRsmP9knVc",
+    Callback = function ()
+        Fluent:Notify({
+            Title = "Chat Bypasser activated.",
+            Content = "Type anything in chat.",
+            SubContent = nil,
+            Duration = 3
+        })
+        loadstring(game:HttpGet("https://pastebin.com/raw/rUPzeMS8", true))()
+    end
+})
+
+Tabs.Misc:AddButton({
+    Title = "Infinite Yield Reborn (Includes Dex Explorer)",
+    Description = "Self Explainatory.",
+    Callback = function ()
+        loadstring(game:HttpGet("https://github.com/fuckusfm/infiniteyield-reborn/raw/master/source"))()
+    end
+})
+
+Tabs.Misc:AddButton({
+    Title = "Animation Logger",
+    Description = "By WaveStorag on scriptblox.com",
+    Callback = function ()
+        local gui = Instance.new("ScreenGui")
+        gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(0.3, 0, 0.4, 0)
+        frame.Position = UDim2.new(0.35, 0, 0.3, 0)
+        frame.BackgroundColor3 = Color3.new(0, 0, 0)
+        frame.BorderSizePixel = 0  -- Remove border
+        frame.Parent = gui
+        
+        frame.Draggable = true
+        frame.Active = true
+        
+        local topBar = Instance.new("Frame")
+        topBar.Size = UDim2.new(1, 0, 0, 30)
+        topBar.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+        topBar.BorderSizePixel = 0  -- Remove border
+        topBar.Parent = frame
+        
+        local titleLabel = Instance.new("TextLabel")
+        titleLabel.Size = UDim2.new(1, -140, 1, 0)
+        titleLabel.Position = UDim2.new(0, 0, 0, 0)
+        titleLabel.BackgroundTransparency = 1
+        titleLabel.Text = "Animation Logger"
+        titleLabel.Font = Enum.Font.SourceSans
+        titleLabel.TextColor3 = Color3.new(1, 1, 1)
+        titleLabel.TextSize = 20
+        titleLabel.Parent = topBar
+        
+        local clearButton = Instance.new("TextButton")
+        clearButton.Size = UDim2.new(0, 60, 0, 30)
+        clearButton.Position = UDim2.new(1, -140, 0, 0)
+        clearButton.BackgroundColor3 = Color3.new(1, 0, 0)
+        clearButton.Text = "Clear All"
+        clearButton.TextColor3 = Color3.new(1, 1, 1)
+        clearButton.TextSize = 19
+        clearButton.Font = Enum.Font.SourceSans
+        clearButton.BackgroundTransparency = 1
+        clearButton.Parent = topBar
+        
+        local scrollFrame = Instance.new("ScrollingFrame")
+        scrollFrame.Size = UDim2.new(1, 0, 1, -30)
+        scrollFrame.Position = UDim2.new(0, 0, 0, 30)
+        scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+        scrollFrame.ScrollBarThickness = 10
+        scrollFrame.Parent = frame
+        scrollFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+        
+        local logLayout = Instance.new("UIListLayout")
+        logLayout.Parent = scrollFrame
+        logLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        
+        local loggedAnimations = {}
+        
+        local function logAnimation(animationName, animationId)
+            if loggedAnimations[animationId] then
+                return -- Animation already logged, exit function
+            end
+        
+            loggedAnimations[animationId] = true -- Mark animation as logged
+        
+            local logEntry = Instance.new("TextButton")
+            logEntry.Size = UDim2.new(1, -10, 0, 60) -- Increased height to accommodate both name and ID
+            logEntry.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+            logEntry.Text = string.format("%s\nAnimation ID: %s", animationName, animationId) -- Display animation name and ID
+            logEntry.TextWrapped = true -- Wrap text to fit within button
+            logEntry.Font = Enum.Font.SourceSans
+            logEntry.TextColor3 = Color3.new(1, 1, 1)
+            logEntry.TextSize = 18
+            logEntry.Parent = scrollFrame
+        
+            logEntry.MouseButton1Click:Connect(function()
+                setclipboard(animationId)
+            end)
+        
+            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, logLayout.AbsoluteContentSize.Y)
+        end
+        
+        logLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, logLayout.AbsoluteContentSize.Y)
+        end)
+        
+        local function onAnimationPlayed(animationTrack)
+            local animation = animationTrack.Animation
+            if animation then
+                local animationId = animation.AnimationId
+                local animationName = animation.Name or "Unknown Animation"
+                logAnimation(animationName, animationId)
+            end
+        end
+        
+        local function trackPlayerAnimations()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoid = character:WaitForChild("Humanoid")
+        
+            humanoid.AnimationPlayed:Connect(onAnimationPlayed)
+        end
+        
+        trackPlayerAnimations()
+        
+        clearButton.MouseButton1Click:Connect(function()
+            for _, child in ipairs(scrollFrame:GetChildren()) do
+                if child:IsA("TextButton") then
+                    child:Destroy()
+                end
+            end
+            loggedAnimations = {}
+            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+        end)
+        
+        local xButton = Instance.new("TextButton")
+        xButton.Size = UDim2.new(0, 30, 0, 30)
+        xButton.Position = UDim2.new(1, -30, 0, 0)
+        xButton.BackgroundColor3 = Color3.new(1, 0, 0)
+        xButton.Text = "X"
+        xButton.TextColor3 = Color3.new(1, 1, 1)
+        xButton.TextSize = 24
+        xButton.Font = Enum.Font.SourceSans
+        xButton.BackgroundTransparency = 1
+        xButton.Parent = topBar
+        
+        xButton.MouseButton1Click:Connect(function()
+            gui:Destroy()
+        end)
+        
+        local minimizeButton = Instance.new("TextButton")
+        minimizeButton.Size = UDim2.new(0, 30, 0, 30)
+        minimizeButton.Position = UDim2.new(1, -60, 0, 0)
+        minimizeButton.BackgroundColor3 = Color3.new(0, 0, 1)
+        minimizeButton.Text = "–"
+        minimizeButton.TextColor3 = Color3.new(1, 1, 1)
+        minimizeButton.TextSize = 24
+        minimizeButton.Font = Enum.Font.SourceSans
+        minimizeButton.BackgroundTransparency = 1
+        minimizeButton.Parent = topBar
+        
+        -- Functionality to minimize/maximize the GUI when minimize button is clicked
+        local isMinimized = false
+        local originalSize = frame.Size
+        minimizeButton.MouseButton1Click:Connect(function()
+            isMinimized = not isMinimized
+            if isMinimized then
+                minimizeButton.Text = "+"
+                frame.Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 30) -- Minimized size
+                scrollFrame.Visible = false
+            else
+                minimizeButton.Text = "–"
+                frame.Size = originalSize -- Restore to original size
+                scrollFrame.Visible = true
+            end
+        end)
+    end
+})
+
+Window:SelectTab(1)
+
+SaveManager:LoadAutoloadConfig()
