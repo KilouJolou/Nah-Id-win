@@ -513,8 +513,6 @@ local function HonoredOne()
 
             tween:Play()
             tween.Completed:Connect(function()
-                task.wait(1.65)
-                HonoredAnim:AdjustSpeed(0)
             end)
         end)
     end
